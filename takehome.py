@@ -1,5 +1,11 @@
 import copy
 
+#########################################################
+#    Lorant Polya
+#    Sortable Takehome
+#    August 7, 2017
+#########################################################
+
 class Product:
 	numProds = 0
 
@@ -26,6 +32,14 @@ class Listing:
 
 	def printListing(self):
 		print("{\"title\":\"" + self.title + "\",\"manufacturer\":\"" + self.manu + "\",\"currency\":\"" + self.curr + "\",\"price\":\"" + self.price + "\"}")
+
+class Result:
+	prodName = ""
+	listings = []
+
+	def __init__(self, prodName, listings):
+		self.prodName = prodName
+		self.listings = copy.deepcopy(listings)
 
 # Reads products and Listings from there files
 def readProdsAndListings():
@@ -58,11 +72,14 @@ def readProdsAndListings():
 					date = value
 
 			product = Product(prodName, manu, model, family, date)
+
+			# create list of valid manufacturers, that is, manufacturers as stated in the products file
 			if manu.lower() not in manufacturers:
 				manufacturers.append(manu.lower())
-			#product.printProd()
+
 			products.append(copy.deepcopy(product))
 
+	# had to parse listings differently than products because colons weren't just used to separate titles from values
 	with open("listings.txt", "r") as listingsFile:
 		for line in listingsFile:
 			line = line.strip()
@@ -100,7 +117,6 @@ def readProdsAndListings():
 					price = value
 
 			listing = Listing(title, manu, curr, price)
-			#listing.printListing()
 			listings.append(copy.deepcopy(listing))
 			
 			# store listings in a dictionary by valid manufacturer
@@ -170,7 +186,9 @@ def match():
 			listings = relevantListings[prod.manu.lower()]
 
 			for listing in listings:
-				if (prod.model != "" and prod.model.lower() in listing.title.lower()) and (prod.family != "" and prod.family.lower()):
+				model = " %s " % (prod.model)
+				family = " %s " % (prod.family)
+				if (prod.model != "" and model.lower() in listing.title.lower()) and (prod.family != "" or family.lower()):
 					if prod.prodName not in results:
 						resultsForProd = [listing]
 						results[prod.prodName] = resultsForProd
@@ -178,6 +196,9 @@ def match():
 						resultsForProd = results[prod.prodName]
 						resultsForProd.append(listing)
 						results[prod.prodName] = resultsForProd
+				else:
+					if prod.prodName not in results:
+						results[prod.prodName] = []
 
 def printResults():
 	o = open("results.txt", "w")
