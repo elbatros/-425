@@ -189,28 +189,47 @@ def match():
 				model = " %s " % (prod.model)
 				family = " %s " % (prod.family)
 				if (prod.model != "" and model.lower() in listing.title.lower()) and (prod.family != "" or family.lower()):
-					if prod.prodName not in results:
+					if prod.prodName not in resultsDict:
 						resultsForProd = [listing]
-						results[prod.prodName] = resultsForProd
+						resultsDict[prod.prodName] = resultsForProd
 					else:
-						resultsForProd = results[prod.prodName]
+						resultsForProd = resultsDict[prod.prodName]
 						resultsForProd.append(listing)
-						results[prod.prodName] = resultsForProd
+						resultsDict[prod.prodName] = resultsForProd
 				else:
-					if prod.prodName not in results:
-						results[prod.prodName] = []
+					if prod.prodName not in resultsDict:
+						resultsDict[prod.prodName] = []
+		else:
+			if prod.prodName not in resultsDict:
+				resultsDict[prod.prodName] = []
+
+#converts the results dictionary into a list of results objects
+def createResultsList():
+	for prodName, listings in resultsDict.items():
+		result = Result(prodName, listings)
+		results.append(result)
 
 def printResults():
 	o = open("results.txt", "w")
 
-	for prodName, listings in results.items():
-		o.write("{\"product_name\": \"" + prodName + "\", \"listings\": [")
-		for i, listing in enumerate(listings):
-			if i == len(listings) - 1:
+	#used this when I was printing the results straight from the dictionary
+	#for prodName, listings in resultsDict.items():
+		#o.write("{\"product_name\": \"" + prodName + "\", \"listings\": [")
+		#for i, listing in enumerate(listings):
+			#if i == len(listings) - 1:
+				#o.write("{\"title\": \"" + listing.title + "\", \"manufacturer\": \"" + listing.manu + "\", \"currency\": \"" + listing.curr + "\", \"price\": \"" + listing.price + "\"}")
+			#else:
+				#o.write("{\"title\": \"" + listing.title + "\", \"manufacturer\": \"" + listing.manu + "\", \"currency\": \"" + listing.curr + "\", \"price\": \"" + listing.price + "\"}, ")
+
+		#o.write("]}\n")
+
+	for result in results:
+		o.write("{\"product_name\": \"" + result.prodName + "\", \"listings\": [")
+		for i, listing in enumerate(result.listings):
+			if i == len(result.listings) - 1:
 				o.write("{\"title\": \"" + listing.title + "\", \"manufacturer\": \"" + listing.manu + "\", \"currency\": \"" + listing.curr + "\", \"price\": \"" + listing.price + "\"}")
 			else:
 				o.write("{\"title\": \"" + listing.title + "\", \"manufacturer\": \"" + listing.manu + "\", \"currency\": \"" + listing.curr + "\", \"price\": \"" + listing.price + "\"}, ")
-
 		o.write("]}\n")
 	o.close()
 
@@ -220,10 +239,12 @@ products = []             # List of all products
 listings = []             # List of all listings
 relevantListings = {}     # Dictionary that holds a list of listings with key as manufacturer
 manufacturers = []        # List of manufacturers
-results = {}
+resultsDict = {}          # Dictionary of results, key is the product name
+results = []              # List of results objects     
 
 readProdsAndListings()
 match()
+createResultsList()
 printResults()
 
 
