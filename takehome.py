@@ -4,6 +4,9 @@ import copy
 #    Lorant Polya
 #    Sortable Takehome
 #    August 7, 2017
+#
+#    Comapres a list of listings and prodcts and matches
+#    the listings to the products
 #########################################################
 
 class Product:
